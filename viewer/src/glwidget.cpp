@@ -336,7 +336,6 @@ void GLWidget::paintGL() {
             m_frames = 0;
             m_time.reset();
             emit fps(QString("%1 fps").arg((int)(m_fps+0.5)));
-            qDebug() << QString("%1 fps").arg((int)(m_fps+0.5));
         }
     }
 }

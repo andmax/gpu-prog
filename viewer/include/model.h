@@ -30,6 +30,7 @@ public:
     bool hasColors(void) const;
     bool hasTexCoords(void) const;
     bool hasTangents(void) const;
+    bool hasBitangents(void) const;
     const BBox3D &bbox(void) const;
 
 private:
@@ -37,6 +38,7 @@ private:
     int loadTextures(p_ply ply, const char *filename);
     QVector<QVector3D> m_positions;
     QVector<QVector4D> m_tangents;
+    QVector<QVector3D> m_bitangents;
     QVector<QVector3D> m_normals;
     QVector<QVector3D> m_colors;
     QVector<QVector2D> m_texcoords;
