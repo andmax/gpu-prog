@@ -311,14 +311,15 @@ void GLWidget::paintGL() {
     if( m_wireframe ) {
 
 	glUseProgram( 0 );
-        glPushAttrib( GL_POLYGON_BIT | GL_ENABLE_BIT );
+        glPushAttrib( GL_POLYGON_BIT | GL_LINE_BIT | GL_ENABLE_BIT );
 	glDisable( GL_LIGHTING );
-	// glEnable( GL_COLOR_MATERIAL );
-	glEnable( GL_POLYGON_OFFSET_LINE );
+
+	glEnable( GL_POLYGON_OFFSET_LINE | GL_LINE_SMOOTH );
         glPolygonMode( GL_FRONT, GL_LINE );
-	// glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
-	glPolygonOffset( 1.f, 1.f );
-	glColor3f( .2f, .2f, .2f );
+	glLineWidth( 2.f );
+
+	glPolygonOffset( .1f, 1.f );
+	glColor3f( .33f, .33f, .33f );
 
         for (int i = 0; i < m_models.size(); i++)
             m_models[i]->drawBare();
