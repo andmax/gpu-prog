@@ -10,8 +10,6 @@
 
 #include "model.h"
 
-
-
 Model::Model(TexCache *texcache): m_texcache(texcache) {
     ;
 }
@@ -40,6 +38,14 @@ static int C ## _ ## M ## _cb(const p_ply_argument argument) { \
     array[index].M(ply_get_argument_value(argument)); \
     return 1; \
 }
+
+cb(QVector4D,setX)
+
+cb(QVector4D,setY)
+
+cb(QVector4D,setZ)
+
+cb(QVector4D,setW)
 
 cb(QVector3D,setX)
 
@@ -86,9 +92,11 @@ void Model::unload() {
     glVertexPointer(3, GL_FLOAT, 0, NULL); 
     glNormalPointer(GL_FLOAT, 0, NULL);
     glColorPointer(3, GL_FLOAT, 0, NULL);
-    glClientActiveTexture(0); 
+    glClientActiveTexture(GL_TEXTURE0); 
     glTexCoordPointer(2, GL_FLOAT, 0, NULL);
-    glClientActiveTexture(1); 
+    glClientActiveTexture(GL_TEXTURE1); 
+    glTexCoordPointer(2, GL_FLOAT, 0, NULL);
+    glClientActiveTexture(GL_TEXTURE2); 
     glTexCoordPointer(2, GL_FLOAT, 0, NULL);
     for (int i = 0; i < m_textures.size(); i++)
         m_texcache->deleteTexture(m_textures[i]);
@@ -99,6 +107,7 @@ void Model::unload() {
     m_texcoords.resize(0);
     m_colors.resize(0);
     m_tangents.resize(0);
+    m_bitangents.resize(0);
 }
 
 void Model::computeNormals(void) {
@@ -168,41 +177,60 @@ void Model::computeBBox(void) {
 
 int Model::loadMesh(p_ply ply, const char *filename) {
     (void) filename;
-    int nv = ply_set_read_cb(ply, "vertex", "x", 
+    int nvertices = ply_set_read_cb(ply, "vertex", "x", 
         QVector3D_setX_cb, &m_positions, 0);
-    if (!nv) {
+    if (!nvertices) {
         ply_close(ply);
         return 0;
     }
-    m_positions.resize(nv);
+    m_positions.resize(nvertices);
     ply_set_read_cb(ply, "vertex", "y", QVector3D_setY_cb, &m_positions, 0);
     ply_set_read_cb(ply, "vertex", "z", QVector3D_setZ_cb, &m_positions, 0);
-    int nn = ply_set_read_cb(ply, "vertex", "nx", 
+    int nnormals = ply_set_read_cb(ply, "vertex", "nx", 
         QVector3D_setX_cb, &m_normals, 0);
-    if (nn) {
-        m_normals.resize(nn);
+    if (nnormals) {
+        m_normals.resize(nnormals);
         ply_set_read_cb(ply, "vertex", "ny", QVector3D_setY_cb, &m_normals, 0);
         ply_set_read_cb(ply, "vertex", "nz", QVector3D_setZ_cb, &m_normals, 0);
     }
-    int ntc = ply_set_read_cb(ply, "vertex", "s", 
+    int ntexcoords = ply_set_read_cb(ply, "vertex", "s", 
         QVector2D_setX_cb, &m_texcoords, 0);
-    if (ntc) {
-        m_texcoords.resize(ntc);
+    if (ntexcoords) {
+        m_texcoords.resize(ntexcoords);
         ply_set_read_cb(ply, "vertex", "t", QVector2D_setY_cb, &m_texcoords, 0);
     } 
-    int nc = ply_set_read_cb(ply, "vertex", "red", 
+
+    int ntangents = ply_set_read_cb(ply, "vertex", "tx", 
+        QVector4D_setX_cb, &m_tangents, 0);
+    if (ntangents) {
+        m_tangents.resize(ntangents);
+        ply_set_read_cb(ply, "vertex", "ty", QVector4D_setY_cb, &m_tangents, 0);
+        ply_set_read_cb(ply, "vertex", "tz", QVector4D_setZ_cb, &m_tangents, 0);
+    }
+
+    int nbitangents = ply_set_read_cb(ply, "vertex", "bx", 
+        QVector3D_setX_cb, &m_bitangents, 0);
+    if (nbitangents) {
+        m_bitangents.resize(nbitangents);
+        ply_set_read_cb(ply, "vertex", "by", QVector3D_setY_cb, 
+            &m_bitangents, 0);
+        ply_set_read_cb(ply, "vertex", "bz", QVector3D_setZ_cb, 
+            &m_bitangents, 0);
+    }
+
+    int ncolors = ply_set_read_cb(ply, "vertex", "red", 
         QVector3D_setX_cb, &m_colors, 0);
-    if (nc) {
-        m_colors.resize(nc);
+    if (ncolors) {
+        m_colors.resize(ncolors);
         ply_set_read_cb(ply, "vertex", "green", 
             QVector3D_setY_cb, &m_colors, 0);
         ply_set_read_cb(ply, "vertex", "blue", 
             QVector3D_setZ_cb, &m_colors, 0);
     } else {
-        nc = ply_set_read_cb(ply, "vertex", "diffuse_red", 
+        ncolors = ply_set_read_cb(ply, "vertex", "diffuse_red", 
             QVector3D_setX_cb, &m_colors, 0);
-        if (nc) {
-            m_colors.resize(nc);
+        if (ncolors) {
+            m_colors.resize(ncolors);
             ply_set_read_cb(ply, "vertex", "diffuse_green", 
                 QVector3D_setY_cb, &m_colors, 0);
             ply_set_read_cb(ply, "vertex", "diffuse_blue", 
@@ -253,7 +281,7 @@ int Model::loadMesh(p_ply ply, const char *filename) {
             m_colors[i] *= (1.0/255.0);
     }
 
-    if (hasTexCoords())
+    if (hasTexCoords() && !hasTangents())
         computeTangents();
 
     qDebug() << "loaded" << m_positions.size() << "v" << m_triangles.size() << "t" << m_materials.size() << "m";
@@ -303,8 +331,9 @@ void Model::createBuffers(void) {
     GLsizei color = m_colors.size()*sizeof(QVector3D);
     GLsizei tex = m_texcoords.size()*sizeof(QVector2D);
     GLsizei tan = m_tangents.size()*sizeof(QVector4D);
+    GLsizei bitan = m_bitangents.size()*sizeof(QVector3D);
     resetError();
-    glBufferData(GL_ARRAY_BUFFER, pos+normal+color+tex+tan, 
+    glBufferData(GL_ARRAY_BUFFER, pos+normal+color+tex+tan+bitan, 
         NULL, GL_STATIC_DRAW);
     GLenum error = glGetError();
     unsigned char *dest = NULL;
@@ -315,6 +344,7 @@ void Model::createBuffers(void) {
         memcpy(dest+pos+normal, m_colors.constData(), color);
         memcpy(dest+pos+normal+color, m_texcoords.constData(), tex);
         memcpy(dest+pos+normal+color+tex, m_tangents.constData(), tan);
+        memcpy(dest+pos+normal+color+tex+tan, m_bitangents.constData(), bitan);
         glUnmapBuffer(GL_ARRAY_BUFFER);
     } else
         qDebug() << "Error" << error << "allocating VBO!";
@@ -352,6 +382,10 @@ bool Model::hasTangents(void) const {
     return m_positions.size() == m_tangents.size();
 }
 
+bool Model::hasBitangents(void) const {
+    return m_positions.size() == m_bitangents.size();
+}
+
 void Model::drawBare(void) const {
     GLsizei pos = m_positions.size()*sizeof(QVector3D);
 
@@ -372,6 +406,7 @@ void Model::draw(void) const {
     GLsizei normal = m_normals.size()*sizeof(QVector3D);
     GLsizei color = m_colors.size()*sizeof(QVector3D);
     GLsizei tex = m_texcoords.size()*sizeof(QVector2D);
+    GLsizei tan = m_tangents.size()*sizeof(QVector4D);
 
     glBindBuffer(GL_ARRAY_BUFFER, m_vertexbuffer);
 
@@ -396,6 +431,13 @@ void Model::draw(void) const {
         glClientActiveTexture(GL_TEXTURE1);
         glTexCoordPointer(4, GL_FLOAT, 0, 
             ((unsigned char *) NULL)+pos+normal+color+tex);
+        glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+    }
+
+    if (hasBitangents()) {
+        glClientActiveTexture(GL_TEXTURE2);
+        glTexCoordPointer(3, GL_FLOAT, 0, 
+            ((unsigned char *) NULL)+pos+normal+color+tex+tan);
         glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     }
 
@@ -434,8 +476,10 @@ void Model::draw(void) const {
 
     glDisableClientState(GL_VERTEX_ARRAY);
     glDisableClientState(GL_NORMAL_ARRAY);
-    glClientActiveTexture(0); glDisableClientState(GL_COLOR_ARRAY);
-    glClientActiveTexture(1); glDisableClientState(GL_COLOR_ARRAY);
+    glClientActiveTexture(GL_TEXTURE0); 
     glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-
+    glClientActiveTexture(GL_TEXTURE1); 
+    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+    glClientActiveTexture(GL_TEXTURE2); 
+    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 }

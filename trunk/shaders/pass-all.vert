@@ -7,7 +7,8 @@ varying vec3 bitangent;
 void main() {
     normal = normalize(gl_NormalMatrix * gl_Normal);
     tangent = normalize(gl_NormalMatrix * gl_MultiTexCoord1.xyz); 
-    bitangent = gl_MultiTexCoord1.w * cross(normal, tangent);
+    //bitangent = gl_MultiTexCoord1.w * cross(normal, tangent);
+    bitangent = normalize(gl_NormalMatrix * gl_MultiTexCoord2.xyz); 
     texcoord0 = vec2(gl_MultiTexCoord0);
     gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
 }
