@@ -1,0 +1,49 @@
+*************************************************************************
+**                                                                     **
+**                  GPU-Prog - GPU Programming Course                  **
+**                                                                     **
+**                              README File                            **
+**                                                                     **
+*************************************************************************
+
+    GPU-Prog is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published
+    by the Free Software Foundation, either version 3 of the License,
+    or (at your option) any later version.
+
+    GPU-Prog is distributed in the hope that it will be useful, but
+    WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see
+    <http://www.gnu.org/licenses/>.
+
+Usage:
+
+    GPU-Prog source codes were written and tested on MAC and Linux
+    platforms using OpenGL Easy Extension (GLee) for additional OpenGL
+    functions and Qt for user interface.  To download and/or see more
+    information about these dependencies access:
+
+    GLee: http://www.opengl.org/sdk/libs/GLee
+    Qt: http://qt.nokia.com
+
+    In order to compile, for example, the viewer app you should go to
+    the project subdirectory, build the makefile and compile the
+    program by:
+
+    $ cd viewer
+    $ qmake-qt4
+    $ make
+
+    To clear everything created by qmake do:
+
+    $ make distclean
+
+    In particular, the viewer app accepts drag-and-drop interaction,
+    so you can drop a model file, for example 'models/bunny.ply', and
+    the viewer will load it.  You can also drop a shader file, for
+    example 'shaders/oscillate.vert', and the viewer will use this
+    shader to render the loaded model.
