@@ -21,7 +21,7 @@ GLWidget::GLWidget(QWidget *parent):
     m_timer.setInterval(0);
     connect(&m_timer, SIGNAL(timeout()), this, SLOT(slotTimer()));
     m_vertshader = m_fragshader = m_program = 0;
-    m_modeldrag = m_lightdrag = m_wireframe = false;
+    m_modeldrag = m_lightdrag = m_wireframe = m_tspace = false;
     m_start = m_time.time();
 }
 
@@ -56,6 +56,10 @@ void GLWidget::keyPressEvent(QKeyEvent *event) {
                 }
                 updateGL();
             }
+            break;
+        case Qt::Key_T:
+            m_tspace = !m_tspace;
+            updateGL();
             break;
         case Qt::Key_W:
             m_wireframe = !m_wireframe;
@@ -276,7 +280,6 @@ void GLWidget::paintGL() {
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-
     // position light in eye space already
     QVector3D lp = m_lightarcball.rotation().rotatedVector(
             QVector3D(0.5, 0.25, 0.83)); 
@@ -311,7 +314,7 @@ void GLWidget::paintGL() {
     if( m_wireframe ) {
 
 	glUseProgram( 0 );
-        glPushAttrib( GL_POLYGON_BIT | GL_LINE_BIT | GL_ENABLE_BIT );
+        glPushAttrib( GL_POLYGON_BIT | GL_LINE_BIT | GL_ENABLE_BIT | GL_CURRENT_BIT );
 	glDisable( GL_LIGHTING );
 
 	glEnable( GL_POLYGON_OFFSET_LINE | GL_LINE_SMOOTH );
@@ -324,6 +327,19 @@ void GLWidget::paintGL() {
         for (int i = 0; i < m_models.size(); i++)
             m_models[i]->drawBare();
     
+        glPopAttrib();
+
+    }
+
+    if( m_tspace ) {
+
+	glUseProgram( 0 );
+        glPushAttrib( GL_ENABLE_BIT | GL_CURRENT_BIT );
+	glDisable( GL_LIGHTING );
+
+        for (int i = 0; i < m_models.size(); i++)
+            m_models[i]->drawTBN();
+
         glPopAttrib();
 
     }

@@ -55,7 +55,7 @@ private:
     int m_frames;
     double m_start;
     double m_fps;
-    bool m_modeldrag, m_lightdrag, m_wireframe;
+    bool m_modeldrag, m_lightdrag, m_wireframe, m_tspace;
     GLuint m_vertshader, m_fragshader, m_program;
 };
 

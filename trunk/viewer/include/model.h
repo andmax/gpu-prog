@@ -21,6 +21,7 @@ public:
     void unload(void);
     void draw() const;
     void drawBare(void) const;
+    void drawTBN(void) const;
     const QVector3D &size(void) const;
     const QVector3D &center(void) const;
     void computeNormals(void);
