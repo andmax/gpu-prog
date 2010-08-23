@@ -2,15 +2,14 @@ uniform sampler2D diffuse_texture;
 uniform sampler2D normalmap_texture;
 
 varying vec4 diffuse, ambient;
-varying vec3 half_vector, normal, light_dir;
+varying vec3 half_vector, light_dir;
 
 void main (void) {
     vec2 st = gl_TexCoord[0].st;
     vec4 decal = texture2D(diffuse_texture, 2.0*st);
     vec4 color = ambient * decal;
     vec3 l = normalize(light_dir);
-	vec3 n = normalize(normal);
-    float NdotL = dot(n, l);
+    float NdotL = l.z; 
     // macro-structure self-shadowing
     if (NdotL > 0.0) {
         vec3 normal_bump = texture2D(normalmap_texture, 3.0*st).xyz * 2.0 - 1.0;
@@ -24,7 +23,7 @@ void main (void) {
             vec4 specular = gl_FrontMaterial.specular * 
                             gl_LightSource[0].specular * 
                             pow(NBdotHV, gl_FrontMaterial.shininess);
-            color += specular;
+            color += specular * 2.0;
         }
     }
 	gl_FragColor = color; 
