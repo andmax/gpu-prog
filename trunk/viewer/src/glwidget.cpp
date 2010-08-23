@@ -240,7 +240,7 @@ void GLWidget::initializeGL() {
     glLightfv(GL_LIGHT0, GL_AMBIENT, lightAmbient);
     static GLfloat lightDiffuse[4] = { 0.85, 0.85, 0.85, 1 };
     glLightfv(GL_LIGHT0, GL_DIFFUSE, lightDiffuse);
-    static GLfloat lightSpecular[4] = { 0.5, 0.5, 0.5, 1 };
+    static GLfloat lightSpecular[4] = { 0.4, 0.4, 0.4, 1 };
     glLightfv(GL_LIGHT0, GL_SPECULAR, lightSpecular);
 
     static GLfloat materialAmbient[4] = { 0.8, 0.5, 0.4, 1 };
@@ -252,7 +252,7 @@ void GLWidget::initializeGL() {
     static GLfloat materialEmission[4] = { 0., 0., 0., 1 };
     glMaterialfv(GL_FRONT, GL_EMISSION, materialEmission);
 
-    static GLfloat materialShininess = 16;
+    static GLfloat materialShininess = 32;
     glMaterialf(GL_FRONT, GL_SHININESS, materialShininess);
 
     glEnable(GL_COLOR_MATERIAL);

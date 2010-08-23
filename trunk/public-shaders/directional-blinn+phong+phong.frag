@@ -4,7 +4,7 @@ varying vec3 normal, light_dir, half_vector;
 void main() {
     vec3 n = normalize(normal);
     vec4 color = ambient;
-    float NdotL = max(dot(n, light_dir), 0.0);
+    float NdotL = max(dot(n, normalize(light_dir)), 0.0);
     if (NdotL > 0.0) {
         color +=  diffuse * NdotL;
         vec3 hv = normalize(half_vector);
